@@ -1,9 +1,21 @@
 
+import { db } from '../db';
+import { salesTransactionsTable, customersTable, salesTransactionItemsTable, productsTable } from '../db/schema';
 import { type SalesTransaction } from '../schema';
 
-export async function getSalesTransactions(): Promise<SalesTransaction[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all sales transactions from the database.
-    // Should include filtering by date range, customer, and include transaction items and customer details.
-    return [];
-}
+export const getSalesTransactions = async (): Promise<SalesTransaction[]> => {
+  try {
+    const results = await db.select()
+      .from(salesTransactionsTable)
+      .execute();
+
+    // Convert numeric fields back to numbers before returning
+    return results.map(transaction => ({
+      ...transaction,
+      total_amount: parseFloat(transaction.total_amount)
+    }));
+  } catch (error) {
+    console.error('Failed to fetch sales transactions:', error);
+    throw error;
+  }
+};

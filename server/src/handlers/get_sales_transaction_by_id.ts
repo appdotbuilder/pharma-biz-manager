@@ -1,15 +1,27 @@
 
+import { db } from '../db';
+import { salesTransactionsTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
 import { type SalesTransaction } from '../schema';
 
 export async function getSalesTransactionById(id: number): Promise<SalesTransaction | null> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching a specific sales transaction with all its items and customer details.
-    // Should return null if transaction doesn't exist and include full transaction details.
-    return Promise.resolve({
-        id: id,
-        transaction_date: new Date(),
-        total_amount: 0,
-        customer_id: null,
-        created_at: new Date()
-    } as SalesTransaction);
+  try {
+    const results = await db.select()
+      .from(salesTransactionsTable)
+      .where(eq(salesTransactionsTable.id, id))
+      .execute();
+
+    if (results.length === 0) {
+      return null;
+    }
+
+    const transaction = results[0];
+    return {
+      ...transaction,
+      total_amount: parseFloat(transaction.total_amount) // Convert numeric field back to number
+    };
+  } catch (error) {
+    console.error('Failed to get sales transaction:', error);
+    throw error;
+  }
 }
